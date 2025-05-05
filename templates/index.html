@@ -1,72 +1,68 @@
 {% extends "base.html" %}
-{% block title %}Restaurant List{% endblock %}
-{% block head %}
-    {{ super() }}
-    <style>
-      body {
-          min-height: 75rem;
-          padding-top: 4.5rem;
-      }
 
-      .score {
-        display: block;
-        font-size: 16px;
-        position: relative;
-        overflow: hidden;
-      }
-      
-      .score-wrap {
-        display: inline-block;
-        position: relative;
-        height: 19px;
-      }
-      
-      .score .stars-active {
-        color: #EEBD01;
-        position: relative;
-        z-index: 10;
-        display: inline-block;
-        overflow: hidden;
-        white-space: nowrap;
-      }
-      
-      .score .stars-inactive {
-        color: grey;
-        position: absolute;
-        top: 0;
-        left: 0;
-        -webkit-text-stroke: initial;
-        /* overflow: hidden; */
-      }
-  </style>
-{% endblock %}
+{% block title %}Visor de Imágenes{% endblock %}
+
 {% block content %}
-      <h1>Restaurants</h1>
+  <h1 class="mt-4 mb-4">Registros de Imágenes</h1>
 
-      {% if True %}
-          <table class="table">
-              <thead>
-                  <tr>
-                      <th>Name</th>
-                      <th>Rating</th>
-                      <th class="text-end">Details</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  {% for restaurant in restaurants %}
-                      <tr>
-                          <td>{{ restaurant.name }}</td>
-                          <td>{% include "star_rating.html" %}</td>
-                          <td class="text-end"><a href="{{ url_for('details', id=restaurant.id) }}" class="btn btn-sm btn-primary">Details</a></td>
-                      </tr>
-                  {% endfor %}
-              </tbody>
-          </table>
-      {% else %}
-          <p>No restaurants exist.  Select Add new restaurant to add one.</p>
-      {% endif %}
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Fecha y hora (UTC)</th>
+        <th>Usuario</th>
+        <th>Fichero</th>
+        <th class="text-end">R</th>
+        <th class="text-end">G</th>
+        <th class="text-end">B</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in records %}
+        <tr>
+          <td>{{ r.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+          <td>{{ r.username }}</td>
+          <td>{{ r.filename }}</td>
+          <td class="text-end">{{ r.pixels_red }}</td>
+          <td class="text-end">{{ r.pixels_green }}</td>
+          <td class="text-end">{{ r.pixels_blue }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
-      <div class="d-flex justify-content-end">
-              <a href="{{ url_for('create_restaurant') }}" class="btn btn-success px-4 gap-3">Add new restaurant</a>
-      </div>
+  {% if pagination %}
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        {% if pagination.has_prev %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('viewer', page=pagination.prev_num, **params) }}" aria-label="Anterior">
+              <span aria-hidden="true">&laquo;</span>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">&laquo;</span>
+          </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+          <span class="page-link">
+            Página {{ pagination.page }} de {{ pagination.pages }}
+          </span>
+        </li>
+
+        {% if pagination.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('viewer', page=pagination.next_num, **params) }}" aria-label="Siguiente">
+              <span aria-hidden="true">&raquo;</span>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">&raquo;</span>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
 {% endblock %}
