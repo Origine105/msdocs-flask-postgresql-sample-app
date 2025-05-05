@@ -1,7 +1,7 @@
 import os
-from datetime import datetime
+from datetime import datetime,timezone
 
-from flask import Flask, redirect, render_template, request, send_from_directory, url_for
+from flask import Flask, redirect, render_template, request, send_from_directory, url_for,jsonify
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
@@ -96,6 +96,25 @@ def add_review(id):
         db.session.commit()
 
     return redirect(url_for('details', id=id))
+
+# Código añadido para recibir datos desde Scala
+@app.route('/api/upload', methods=['POST'])
+@csrf.exempt
+def api_upload():
+    # Se espera JSON con los campos:
+    # filename, pixels_red, pixels_green, pixels_blue, username, (opcional) url_original, urls_converted
+    data = request.get_json(force=True)
+    record = ImageRecord(
+        filename=data['filename'],
+        pixels_red=data['pixels_red'],
+        pixels_green=data['pixels_green'],
+        pixels_blue=data['pixels_blue'],
+        username=data['username'],
+        timestamp=datetime.now(timezone.utc),
+    )
+    db.session.add(record)
+    db.session.commit()
+    return jsonify({'status': 'ok', 'id': record.id}), 201
 
 @app.context_processor
 def utility_processor():
