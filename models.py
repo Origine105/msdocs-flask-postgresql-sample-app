@@ -3,7 +3,7 @@ from sqlalchemy.orm import validates
 
 from app import db
 
-"""
+
 class Restaurant(db.Model):
     __tablename__ = 'restaurant'
     id = Column(Integer, primary_key=True)
@@ -30,7 +30,7 @@ class Review(db.Model):
 
     def __str__(self):
         return f"{self.user_name}: {self.review_date:%x}"
-"""
+
 # Model for image records
 # This model is used to store information about images uploaded by users
 # It includes fields for the filename, pixel counts for each color channel,
