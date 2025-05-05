@@ -32,8 +32,8 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # The import must be done after db initialization due to circular import issue
-from models import Restaurant, Review, ImageRecord
-
+from models import  ImageRecord
+"""
 @app.route('/', methods=['GET'])
 def index():
     print('Request for index page received')
@@ -96,7 +96,7 @@ def add_review(id):
         db.session.commit()
 
     return redirect(url_for('details', id=id))
-
+"""
 # Código añadido para recibir datos desde Scala
 @app.route('/api/upload', methods=['POST'])
 @csrf.exempt
@@ -116,6 +116,7 @@ def api_upload():
     db.session.commit()
     return jsonify({'status': 'ok', 'id': record.id}), 201
 
+"""
 @app.context_processor
 def utility_processor():
     def star_rating(id):
@@ -132,7 +133,7 @@ def utility_processor():
         return {'avg_rating': avg_rating, 'review_count': review_count, 'stars_percent': stars_percent}
 
     return dict(star_rating=star_rating)
-
+"""
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
