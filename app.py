@@ -59,33 +59,37 @@ def api_upload():
     pixels_green = int(request.form.get('pixels_green', 0))
     pixels_blue = int(request.form.get('pixels_blue', 0))
     
-    # Recuperar los archivos enviados
+    # Recuperar los archivos enviados (cada uno es opcional)
     entrada_file = request.files.get('entrada_file')
     salida_file = request.files.get('salida_file')
     
-    # Validar existencia de ambos archivos
-    if not entrada_file or not salida_file:
-        return jsonify({'status': 'error', 'message': 'No se enviaron ambos archivos'}), 400
-
-    # Validar extensiones (se incluye 'bmp')
-    if not (allowed_file(entrada_file.filename) and allowed_file(salida_file.filename)):
-        return jsonify({'status': 'error', 'message': 'Tipo de archivo no permitido'}), 400
-
-    # Limpiar nombres de archivo
-    entrada_filename = secure_filename(entrada_file.filename)
-    salida_filename = secure_filename(salida_file.filename)
-
-    # Guardar archivos en UPLOAD_FOLDER
-    entrada_path = os.path.join(app.config['UPLOAD_FOLDER'], entrada_filename)
-    salida_path = os.path.join(app.config['UPLOAD_FOLDER'], salida_filename)
-    entrada_file.save(entrada_path)
-    salida_file.save(salida_path)
-
-    # Si no se suministra filename, se usa el de entrada
+    # Procesar la imagen de entrada
+    if entrada_file and entrada_file.filename != "":
+        if not allowed_file(entrada_file.filename):
+            return jsonify({'status': 'error', 'message': 'Tipo de archivo no permitido en entrada'}), 400
+        entrada_filename = secure_filename(entrada_file.filename)
+        entrada_path = os.path.join(app.config['UPLOAD_FOLDER'], entrada_filename)
+        entrada_file.save(entrada_path)
+        entrada_path_relative = os.path.join('uploads', entrada_filename)
+    else:
+        entrada_path_relative = "No disponible"
+    
+    # Procesar la imagen de salida
+    if salida_file and salida_file.filename != "":
+        if not allowed_file(salida_file.filename):
+            return jsonify({'status': 'error', 'message': 'Tipo de archivo no permitido en salida'}), 400
+        salida_filename = secure_filename(salida_file.filename)
+        salida_path = os.path.join(app.config['UPLOAD_FOLDER'], salida_filename)
+        salida_file.save(salida_path)
+        salida_path_relative = os.path.join('uploads', salida_filename)
+    else:
+        salida_path_relative = "No disponible"
+    
+    # Si no se suministra filename, se usa el de entrada (si está disponible)
     if not filename_field:
-        filename_field = entrada_filename
-
-    # Crear el registro en la base de datos con rutas relativas (por ejemplo, "uploads/entrada.bmp")
+        filename_field = entrada_filename if entrada_file and entrada_file.filename != "" else "Sin nombre"
+    
+    # Crear el registro en la base de datos con las rutas relativas o "No disponible"
     record = ImageRecord(
         filename=filename_field,
         pixels_red=pixels_red,
@@ -93,8 +97,8 @@ def api_upload():
         pixels_blue=pixels_blue,
         username=username,
         timestamp=datetime.now(timezone.utc),
-        entrada=os.path.join('uploads', entrada_filename),
-        salida=os.path.join('uploads', salida_filename)
+        entrada=entrada_path_relative,
+        salida=salida_path_relative
     )
     db.session.add(record)
     db.session.commit()
