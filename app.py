@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timezone
-from flask import Flask, render_template, request, jsonify, url_for
+from flask import Flask, render_template, request, jsonify, url_for, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
@@ -24,12 +24,12 @@ app.config.update(
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-from models import ImageRecord  # asegúrate de que este modelo existe
+from models import ImageRecord
 
 @app.route('/', methods=['GET'])
 def viewer():
     page = request.args.get('page', 1, type=int)
-    per_page = 10  # puedes ajustar esto
+    per_page = 10  # Puedes ajustar cuántos registros quieres por página
     pagination = ImageRecord.query.order_by(ImageRecord.timestamp.desc()).paginate(page=page, per_page=per_page)
     records = pagination.items
     params = {k: v for k, v in request.args.items() if k != 'page'}
@@ -38,6 +38,7 @@ def viewer():
 @app.route('/api/upload', methods=['POST'])
 @csrf.exempt
 def api_upload():
+    # Se espera JSON con campos: filename, pixels_red, pixels_green, pixels_blue, username, (opcional) entrada, salida.
     data = request.get_json(force=True)
     record = ImageRecord(
         filename=data['filename'],
@@ -46,6 +47,8 @@ def api_upload():
         pixels_blue=data['pixels_blue'],
         username=data['username'],
         timestamp=datetime.now(timezone.utc),
+        entrada=data.get('entrada'),  # ruta de imagen de entrada (relativa a static/)
+        salida=data.get('salida')       # ruta de imagen de salida (relativa a static/)
     )
     db.session.add(record)
     db.session.commit()
@@ -53,8 +56,8 @@ def api_upload():
 
 @app.route('/favicon.ico')
 def favicon():
-    from flask import send_from_directory
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 if __name__ == '__main__':
     app.run()

@@ -16,8 +16,10 @@ class ImageRecord(db.Model):
     pixels_blue = Column(Integer, nullable=False)
     username = Column(String(50), nullable=False)
     timestamp = Column(DateTime, nullable=False)
-    #url_original = Column(Text)        # opcional: URL donde está subida la imagen
-    #urls_converted = Column(Text)     # opcional: JSON/Text con URLs de imágenes procesadas
+    # Nuevos campos para almacenar la ruta (o URL) de las imágenes de entrada y salida
+    entrada = Column(String(200), nullable=True)
+    salida = Column(String(200), nullable=True)
 
+    
     def __repr__(self):
         return f"<ImageRecord {self.filename} by {self.username} at {self.timestamp}>"

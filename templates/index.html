@@ -14,17 +14,33 @@
         <th class="text-end">R</th>
         <th class="text-end">G</th>
         <th class="text-end">B</th>
+        <th>Entrada</th>
+        <th>Salida</th>
       </tr>
     </thead>
     <tbody>
       {% for r in records %}
-        <tr>
+        <tr style="vertical-align: middle; height: 160px;">
           <td>{{ r.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
           <td>{{ r.username }}</td>
           <td>{{ r.filename }}</td>
           <td class="text-end">{{ r.pixels_red }}</td>
           <td class="text-end">{{ r.pixels_green }}</td>
           <td class="text-end">{{ r.pixels_blue }}</td>
+          <td>
+            {% if r.entrada %}
+              <img src="{{ url_for('static', filename=r.entrada) }}" alt="Entrada" style="max-width: 150px; max-height: 150px;">
+            {% else %}
+              No disponible
+            {% endif %}
+          </td>
+          <td>
+            {% if r.salida %}
+              <img src="{{ url_for('static', filename=r.salida) }}" alt="Salida" style="max-width: 150px; max-height: 150px;">
+            {% else %}
+              No disponible
+            {% endif %}
+          </td>
         </tr>
       {% endfor %}
     </tbody>
@@ -71,6 +87,6 @@
 <script>
   setTimeout(function() {
     window.location.reload();
-  }, 10000); // 10 segundos
+  }, 10000); // Recarga la página cada 10 segundos
 </script>
 {% endblock %}
